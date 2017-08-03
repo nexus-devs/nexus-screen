@@ -1,3 +1,6 @@
+#include "include/zmq.hpp"
+#pragma comment(lib, "lib/libzmq-v120-mt-gd-4_0_4.lib")
+
 #include "include/NexusHook.h"
 #pragma comment(lib, "lib/NexusHook.lib")
 
@@ -73,6 +76,8 @@ void InitDll() {
 	AttachConsole(GetCurrentProcessId());
 	freopen("CON", "w", stdout);
 	std::cout << "Dll attached" << std::endl;
+
+	// Setup ZMQ
 
 	// Init hook manager
 	hkMngr.Init();
