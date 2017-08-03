@@ -8,7 +8,7 @@ typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncIn
 NexusHook hkMngr;
 
 // Takes a screenshot
-bool TakeScreenshot() {
+bool SaveTexture() {
 
 	// Get device and swapchain from NexusHook
 	IDXGISwapChain* pSwapChain = hkMngr.hMngr.pSwapChain;
@@ -18,7 +18,7 @@ bool TakeScreenshot() {
 	// Init backbuffer description and pointer
 	D3D11_TEXTURE2D_DESC TextureDesc;
 	ID3D11Texture2D *pBackBuffer = NULL;
-	ID3D11Texture2D *pBackBufferTexture = NULL;
+	ID3D11Texture2D *pBackBufferDesc = NULL;
 
 	// Get buffer of current swapchain
 	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
@@ -32,25 +32,26 @@ bool TakeScreenshot() {
 	TextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;	// Read access for CPU
 
 	// Create texture from new description
-	HRESULT CreateTextureResult = pDevice->CreateTexture2D(&TextureDesc, NULL, &pBackBufferTexture);
+	HRESULT CreateTextureResult = pDevice->CreateTexture2D(&TextureDesc, NULL, &pBackBufferDesc);
 	if (FAILED(CreateTextureResult)) {
 		std::cout << "Couldn't create texture from new description" << std::endl;
 		return false;
 	}
 
 	// Copy backbuffer into texture
-	pContext->CopyResource(pBackBufferTexture, pBackBuffer);
+	pContext->CopyResource(pBackBufferDesc, pBackBuffer);
 
 	// Save to file
+	/*
 	CreateTextureResult = D3DX11SaveTextureToFileA(pContext, pBackBufferTexture, D3DX11_IFF_BMP, "C:\\Users\\Nakroma\\Documents\\Visual Studio 2017\\Projects\\test.bmp");
 	if (FAILED(CreateTextureResult)) {
 		std::cout << "Couldn't save texture to file" << std::endl;
 		return false;
-	}
+	}*/
 
 	// Release resources
-	pBackBufferTexture->Release();
 	pBackBuffer->Release();
+	pBackBufferDesc->Release();
 
 	return true;
 }
@@ -59,7 +60,7 @@ bool TakeScreenshot() {
 HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags) {
 
 	// Take screenshot
-	TakeScreenshot();
+	SaveTexture();
 
 	// Call original function
 	return ((D3D11PresentHook)hkMngr.oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);

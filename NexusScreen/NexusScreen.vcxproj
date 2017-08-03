@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="include\Includes.h" />
     <ClInclude Include="include\NexusHook.h" />
+    <ClInclude Include="NexusScreen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
