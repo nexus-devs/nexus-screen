@@ -151,7 +151,6 @@
   <ItemGroup>
     <ClInclude Include="include\Includes.h" />
     <ClInclude Include="include\NexusHook.h" />
-    <ClInclude Include="include\zmq.h" />
     <ClInclude Include="include\zmq.hpp" />
     <ClInclude Include="NexusScreen.h" />
   </ItemGroup>
