@@ -8,15 +8,15 @@
 #pragma comment(lib, "D3DX11.lib")
 
 typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags);
-NexusHook hkMngr;
+NexusHook *hkMngr;
 
 // Takes a screenshot
 bool SaveTexture() {
 
 	// Get device and swapchain from NexusHook
-	IDXGISwapChain* pSwapChain = hkMngr.hMngr.pSwapChain;
-	ID3D11Device* pDevice = hkMngr.hMngr.pDevice;
-	ID3D11DeviceContext* pContext = hkMngr.hMngr.pContext;
+	IDXGISwapChain* pSwapChain = hkMngr->hMngr.pSwapChain;
+	ID3D11Device* pDevice = hkMngr->hMngr.pDevice;
+	ID3D11DeviceContext* pContext = hkMngr->hMngr.pContext;
 
 	// Init backbuffer description and pointer
 	D3D11_TEXTURE2D_DESC TextureDesc;
@@ -66,7 +66,7 @@ HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval,
 	SaveTexture();
 
 	// Call original function
-	return ((D3D11PresentHook)hkMngr.oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);
+	return ((D3D11PresentHook)hkMngr->oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);
 }
 
 void InitDll() {
@@ -78,12 +78,20 @@ void InitDll() {
 	std::cout << "Dll attached" << std::endl;
 
 	// Setup ZMQ
+	/*
+	zmqContext = zmq::context_t(1);
+	zmqPublisher = zmq::socket_t(zmqContext, ZMQ_PUB);
+	zmqPublisher.bind("tcp://localhost:5050");*/
+
+	// Setup hook manager
+	hkMngr = (NexusHook*)calloc(1, sizeof(NexusHook));
+	*hkMngr = NexusHook();
 
 	// Init hook manager
-	hkMngr.Init();
+	hkMngr->Init();
 
 	// Hook present
-	hkMngr.HookSwapChain((DWORD_PTR)SwapChainPresentHook, SC_PRESENT);
+	hkMngr->HookSwapChain((DWORD_PTR)SwapChainPresentHook, SC_PRESENT);
 }
 
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD fwdReason, LPVOID lpvReserved) {
