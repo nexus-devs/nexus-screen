@@ -31,7 +31,7 @@
     <ClInclude Include="include\Includes.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="include\zmq.hpp">
+    <ClInclude Include="include\zmqhelpers.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

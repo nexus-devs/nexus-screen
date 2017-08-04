@@ -1,4 +1,4 @@
-#include "include/zmq.hpp"
+#include "include/zmqhelpers.hpp"
 #pragma comment(lib, "lib/libzmq-v120-mt-gd-4_0_4.lib")
 
 #include "include/NexusHook.h"
