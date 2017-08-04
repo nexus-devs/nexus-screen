@@ -9,6 +9,8 @@
 
 typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags);
 NexusHook *hkMngr;
+zmq::context_t *zmqContext;
+zmq::socket_t *zmqPublisher;
 
 // Takes a screenshot
 bool SaveTexture() {
@@ -78,10 +80,13 @@ void InitDll() {
 	std::cout << "Dll attached" << std::endl;
 
 	// Setup ZMQ
-	/*
-	zmqContext = zmq::context_t(1);
-	zmqPublisher = zmq::socket_t(zmqContext, ZMQ_PUB);
-	zmqPublisher.bind("tcp://localhost:5050");*/
+	zmqContext = (zmq::context_t*)calloc(1, sizeof(zmq::context_t));
+	zmqPublisher = (zmq::socket_t*)calloc(1, sizeof(zmq::socket_t));
+
+	// Init ZMQ
+	*zmqContext = zmq::context_t(1);
+	*zmqPublisher = zmq::socket_t(*zmqContext, ZMQ_PUB);
+	zmqPublisher->bind("tcp://localhost:5050");
 
 	// Setup hook manager
 	hkMngr = (NexusHook*)calloc(1, sizeof(NexusHook));
