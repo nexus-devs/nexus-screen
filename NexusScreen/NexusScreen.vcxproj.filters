@@ -31,9 +31,6 @@
     <ClInclude Include="include\Includes.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="NexusScreen.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="include\zmq.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
