@@ -151,7 +151,6 @@
   <ItemGroup>
     <ClInclude Include="include\Includes.h" />
     <ClInclude Include="include\NexusHook.h" />
-    <ClInclude Include="include\zmqhelpers.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

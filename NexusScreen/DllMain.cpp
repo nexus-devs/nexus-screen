@@ -1,6 +1,3 @@
-#include "include/zmqhelpers.hpp"
-#pragma comment(lib, "lib/libzmq-v120-mt-gd-4_0_4.lib")
-
 #include "include/NexusHook.h"
 #pragma comment(lib, "lib/NexusHook.lib")
 
@@ -9,8 +6,6 @@
 
 typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags);
 NexusHook *hkMngr;
-zmq::context_t *zmqContext;
-zmq::socket_t *zmqPublisher;
 
 // Takes a screenshot
 bool SaveTexture() {
@@ -64,6 +59,9 @@ bool SaveTexture() {
 // Present hook
 HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags) {
 
+	//s_sendmore(*zmqPublisher, "Test");
+	//s_send(*zmqPublisher, "Hallo");
+
 	// Take screenshot
 	SaveTexture();
 
@@ -79,15 +77,6 @@ void InitDll() {
 	freopen("CON", "w", stdout);
 	std::cout << "Dll attached" << std::endl;
 
-	// Setup ZMQ
-	zmqContext = (zmq::context_t*)calloc(1, sizeof(zmq::context_t));
-	zmqPublisher = (zmq::socket_t*)calloc(1, sizeof(zmq::socket_t));
-
-	// Init ZMQ
-	*zmqContext = zmq::context_t(1);
-	*zmqPublisher = zmq::socket_t(*zmqContext, ZMQ_PUB);
-	zmqPublisher->bind("tcp://localhost:5050");
-
 	// Setup hook manager
 	hkMngr = (NexusHook*)calloc(1, sizeof(NexusHook));
 	*hkMngr = NexusHook();
@@ -102,6 +91,7 @@ void InitDll() {
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD fwdReason, LPVOID lpvReserved) {
 
 	if (fwdReason == DLL_PROCESS_ATTACH) {
+
 		// Create new thread
 		DisableThreadLibraryCalls(hModule);
 		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)InitDll, NULL, NULL, NULL);
