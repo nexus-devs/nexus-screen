@@ -6,6 +6,7 @@
 
 typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags);
 NexusHook *hkMngr;
+HANDLE hPipe;
 
 // Takes a screenshot
 bool SaveTexture() {
@@ -59,9 +60,6 @@ bool SaveTexture() {
 // Present hook
 HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags) {
 
-	//s_sendmore(*zmqPublisher, "Test");
-	//s_send(*zmqPublisher, "Hallo");
-
 	// Take screenshot
 	SaveTexture();
 
@@ -69,6 +67,24 @@ HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval,
 	return ((D3D11PresentHook)hkMngr->oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);
 }
 
+// Inits request pipe
+void InitPipe() {
+
+	// Create pipe
+	hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\NexusScreen"),	// Name
+		PIPE_ACCESS_OUTBOUND,									// Send only
+		PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,		// Bytestream
+		1,
+		1024 * 16,
+		1024 * 16,
+		NMPWAIT_USE_DEFAULT_WAIT,
+		NULL);
+
+	if (hPipe == INVALID_HANDLE_VALUE) std::cout << "Failed on pipe creation" << std::endl;
+	else std::cout << "Created request pipe" << std::endl;
+}
+
+// Inits Dll
 void InitDll() {
 
 	// Set up console
@@ -76,6 +92,9 @@ void InitDll() {
 	AttachConsole(GetCurrentProcessId());
 	freopen("CON", "w", stdout);
 	std::cout << "Dll attached" << std::endl;
+
+	// Setup pipe
+	InitPipe();
 
 	// Setup hook manager
 	hkMngr = (NexusHook*)calloc(1, sizeof(NexusHook));
@@ -95,6 +114,12 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD fwdReason, LPVOID lpvReserved) {
 		// Create new thread
 		DisableThreadLibraryCalls(hModule);
 		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)InitDll, NULL, NULL, NULL);
+	}
+
+	else if (fwdReason == DLL_PROCESS_DETACH) {
+
+		// Delete pipe
+		DisconnectNamedPipe(hPipe);
 	}
 
 	return TRUE;
