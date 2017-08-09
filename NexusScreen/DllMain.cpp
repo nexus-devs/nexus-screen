@@ -10,7 +10,7 @@ HANDLE hPipe;
 DWORD dwPipeThreadId = 0;
 
 // Takes a screenshot
-bool SaveTexture() {
+bool SaveTexture(HANDLE hTempPipe) {
 
 	// Get device and swapchain from NexusHook
 	IDXGISwapChain* pSwapChain = hkMngr->hMngr.pSwapChain;
@@ -62,7 +62,7 @@ bool SaveTexture() {
 HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags) {
 
 	// Take screenshot
-	SaveTexture();
+	//SaveTexture();
 
 	// Call original function
 	return ((D3D11PresentHook)hkMngr->oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);
@@ -73,7 +73,23 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam) {
 
 	std::cout << "Started pipe thread" << std::endl;
 
+	// Get pipe from param
+	HANDLE hTempPipe = NULL;
+	if (lpvParam == NULL) return 0;
+	else hTempPipe = (HANDLE)lpvParam;
+
+	// Accept incoming requests
 	while (1) {
+
+		// Check for connected pipe
+		if (ConnectNamedPipe(hTempPipe, NULL)) {
+
+			std::cout << "Got request on pipe..." << std::endl;
+
+			// Send screenshot to pipe
+			SaveTexture(hTempPipe);
+		}
+		else std::cout << "Failed on accepting request to pipe" << std::endl;
 	}
 
 	return 1;
