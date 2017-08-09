@@ -7,6 +7,7 @@
 typedef HRESULT(__stdcall *D3D11PresentHook) (IDXGISwapChain* pThis, UINT SyncInterval, UINT Flags);
 NexusHook *hkMngr;
 HANDLE hPipe;
+DWORD dwPipeThreadId = 0;
 
 // Takes a screenshot
 bool SaveTexture() {
@@ -67,6 +68,17 @@ HRESULT __stdcall SwapChainPresentHook(IDXGISwapChain* pThis, UINT SyncInterval,
 	return ((D3D11PresentHook)hkMngr->oFunctions[SC_PRESENT])(pThis, SyncInterval, Flags);
 }
 
+// Pipe thread
+DWORD WINAPI InstanceThread(LPVOID lpvParam) {
+
+	std::cout << "Started pipe thread" << std::endl;
+
+	while (1) {
+	}
+
+	return 1;
+}
+
 // Inits request pipe
 void InitPipe() {
 
@@ -82,6 +94,17 @@ void InitPipe() {
 
 	if (hPipe == INVALID_HANDLE_VALUE) std::cout << "Failed on pipe creation" << std::endl;
 	else std::cout << "Created request pipe" << std::endl;
+
+	// Start pipe thread
+	HANDLE hPipeThread = CreateThread(NULL,	// No security attributes
+		0,				// Default stack size
+		InstanceThread,	// Thread function
+		(LPVOID)hPipe,	// Thread params
+		0,				// Not suspended
+		&dwPipeThreadId);	// Save thread id
+
+	if (hPipeThread == NULL) std::cout << "Failed on pipe thread creation" << std::endl;
+	else CloseHandle(hPipeThread);
 }
 
 // Inits Dll
