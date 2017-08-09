@@ -132,9 +132,6 @@ void InitDll() {
 	freopen("CON", "w", stdout);
 	std::cout << "Dll attached" << std::endl;
 
-	// Setup pipe
-	InitPipe();
-
 	// Setup hook manager
 	hkMngr = (NexusHook*)calloc(1, sizeof(NexusHook));
 	*hkMngr = NexusHook();
@@ -144,6 +141,9 @@ void InitDll() {
 
 	// Hook present
 	hkMngr->HookSwapChain((DWORD_PTR)SwapChainPresentHook, SC_PRESENT);
+
+	// Setup pipe
+	InitPipe();
 }
 
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD fwdReason, LPVOID lpvReserved) {
