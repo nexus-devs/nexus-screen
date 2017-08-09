@@ -43,6 +43,13 @@ bool SaveTexture(HANDLE hTempPipe) {
 	// Copy backbuffer into texture
 	pContext->CopyResource(pBackBufferDesc, pBackBuffer);
 
+	char *sContent = "HAllo :D";
+	DWORD dwWritten;
+	if (!WriteFile(hTempPipe, sContent, strlen(sContent), &dwWritten, NULL)) {
+		std::cout << "Failed to write input pipe " << std::hex << GetLastError() << std::endl;
+		return false;
+	}
+
 	// Save to file
 	/*
 	CreateTextureResult = D3DX11SaveTextureToFileA(pContext, pBackBufferTexture, D3DX11_IFF_BMP, "C:\\Users\\Nakroma\\Documents\\Visual Studio 2017\\Projects\\test.bmp");
@@ -90,6 +97,9 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam) {
 			SaveTexture(hTempPipe);
 		}
 		else std::cout << "Failed on accepting request to pipe" << std::endl;
+
+		// Disconnect client
+		DisconnectNamedPipe(hTempPipe);
 	}
 
 	return 1;
